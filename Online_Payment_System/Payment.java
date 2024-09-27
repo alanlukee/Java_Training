@@ -26,4 +26,6 @@ public abstract class Payment implements PaymentProcessor {
     	double calcDisc = (amount*(discountRate/100))+additionalDiscount;
         return  calcDisc;
     }
+    
+    public abstract double processPayment(double amount);
 }
