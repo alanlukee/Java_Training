@@ -5,6 +5,7 @@ import java.util.List;
 public class BillingCalculator {
     
     public double calculateBill(List<MedicalService> services) {
+    	
         double totalBill = 0;
         for (MedicalService service : services) {
             totalBill += service.getCost();
@@ -14,12 +15,13 @@ public class BillingCalculator {
     
  
     public double calculateBill(List<MedicalService> services, InsurancePlan insurance) {
+    	
         double totalBill = 0;
         for (MedicalService service : services) {
             totalBill += service.getCost();
         }
-        double insuranceCoverage = totalBill * (insurance.getCoveragePercentage() / 100);
-        return totalBill - insuranceCoverage; 
+        double insuranceCoverage = totalBill*(insurance.getCoverage()/100);
+        return totalBill-insuranceCoverage; 
     }
     
  
@@ -29,11 +31,11 @@ public class BillingCalculator {
         for (MedicalService service : services) {
             totalBill += service.getCost();
         }
-        double insuranceCoverage = totalBill * (insurance.getCoveragePercentage() / 100);
-        double billAfterInsurance = totalBill - insuranceCoverage;
+        double insuranceCoverage = totalBill * (insurance.getCoverage()/100);
+        double billAfterInsurance =totalBill - insuranceCoverage;
         
         
-        double coPayAmount = billAfterInsurance * (policy.getCoPayPercentage() / 100);
-        return billAfterInsurance + coPayAmount; 
+        double coPayAmount = billAfterInsurance * (policy.getCoPay()/100);
+        return billAfterInsurance+coPayAmount; 
     }
 }

@@ -7,7 +7,7 @@ public class CoPaymentPolicy {
         this.coPay = coPay;
     }
     
-    public double getCoPayPercentage() {
+    public double getCoPay() {
         return coPay;
     }
 }

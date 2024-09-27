@@ -7,7 +7,7 @@ public class InsurancePlan {
         this.coverage = coverage;
     }
     
-    public double getCoveragePercentage() {
+    public double getCoverage() {
         return coverage;
     }
 }
