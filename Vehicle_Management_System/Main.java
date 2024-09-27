@@ -32,12 +32,7 @@ public class Main {
         } else if (vehicleType.equals("Truck")) {
             rent.calculateRentalCost(duration, truckRate, feature);
         }
-        
-        
 
-		
-		
-		
 
 	}
 
