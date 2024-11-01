@@ -1,0 +1,29 @@
+import javax.swing.*;
+
+public class CustomTreeModelExample extends JFrame {
+
+    public CustomTreeModelExample() {
+        setTitle("Custom TreeModel Example");
+        setSize(400, 300);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        // Root node
+        Employee ceo = new Employee("John Doe", "CEO");
+
+        // Create custom TreeModel with the root Employee
+        EmployeeTreeModel treeModel = new EmployeeTreeModel(ceo);
+
+        // Create the JTree with the custom TreeModel
+        JTree tree = new JTree(treeModel);
+
+        // Add to scroll pane
+        add(new JScrollPane(tree));
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            CustomTreeModelExample example = new CustomTreeModelExample();
+            example.setVisible(true);
+        });
+    }
+}
