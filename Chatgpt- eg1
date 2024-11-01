@@ -1,0 +1,45 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.datatransfer.*;
+import java.awt.event.*;
+
+public class DragDropExample extends JFrame {
+    
+    public DragDropExample() {
+        // Set up frame
+        setTitle("Drag and Drop Example");
+        setSize(400, 200);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
+
+        // Source component - JTextField with a TransferHandler
+        JTextField textField = new JTextField("Drag this text!");
+        textField.setTransferHandler(new TransferHandler("text"));  // Enables drag-and-drop for text
+
+        // Listener to start the drag
+        textField.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                // Initiate drag when user drags from text field
+                JComponent comp = (JComponent) e.getSource();
+                TransferHandler handler = comp.getTransferHandler();
+                handler.exportAsDrag(comp, e, TransferHandler.COPY);
+            }
+        });
+
+        // Target component - JTextArea with a TransferHandler
+        JTextArea textArea = new JTextArea("Drop the text here!");
+        textArea.setTransferHandler(new TransferHandler("text"));  // Enables text drop
+
+        // Add components to frame
+        add(textField, BorderLayout.NORTH);
+        add(new JScrollPane(textArea), BorderLayout.CENTER);
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            DragDropExample frame = new DragDropExample();
+            frame.setVisible(true);
+        });
+    }
+}
