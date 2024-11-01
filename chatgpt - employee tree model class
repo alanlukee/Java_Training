@@ -1,0 +1,58 @@
+import javax.swing.tree.TreeModel;
+import javax.swing.event.TreeModelListener;
+import java.util.ArrayList;
+import java.util.List;
+
+public class EmployeeTreeModel implements TreeModel {
+    private Employee root;
+    private List<TreeModelListener> listeners = new ArrayList<>();
+
+    public EmployeeTreeModel(Employee root) {
+        this.root = root;
+    }
+
+    @Override
+    public Object getRoot() {
+        return root;
+    }
+
+    @Override
+    public Object getChild(Object parent, int index) {
+        if (parent instanceof Employee) {
+            // Example of custom logic for fetching children
+            // For demo, we just return placeholder values
+            return new Employee("Child " + (index + 1), "Position " + (index + 1));
+        }
+        return null;
+    }
+
+    @Override
+    public int getChildCount(Object parent) {
+        return 2; // Example: each employee has two subordinates
+    }
+
+    @Override
+    public boolean isLeaf(Object node) {
+        return false; // Define the condition for leaf nodes
+    }
+
+    @Override
+    public int getIndexOfChild(Object parent, Object child) {
+        return 0; // Placeholder, add logic as needed
+    }
+
+    @Override
+    public void valueForPathChanged(javax.swing.tree.TreePath path, Object newValue) {
+        // Not implemented for this example
+    }
+
+    @Override
+    public void addTreeModelListener(TreeModelListener l) {
+        listeners.add(l);
+    }
+
+    @Override
+    public void removeTreeModelListener(TreeModelListener l) {
+        listeners.remove(l);
+    }
+}
