@@ -1,4 +1,4 @@
-package com.Exercise_1;
+package com.spaceX;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -19,12 +19,13 @@ public class TextPanel extends JPanel {
 		
 		add(textArea,BorderLayout.CENTER);
 		Border innerBorder = BorderFactory.createTitledBorder("Star Base");
-		Border outerBorder = BorderFactory.createLineBorder(Color.darkGray, 2, true);
+		Border outerBorder = BorderFactory.createLineBorder(Color.BLACK, 2, true);
 		setBorder(BorderFactory.createCompoundBorder(outerBorder,innerBorder));
 		
 	}
 	public void appendText(String text) {
 		textArea.append(text);
+		
 	}
 	
 	public void clearTextArea() {
@@ -32,4 +33,3 @@ public class TextPanel extends JPanel {
 	}
 	
 }
-
