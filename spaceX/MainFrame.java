@@ -1,94 +1,107 @@
-package com.Exercise_1;
+package com.spaceX;
+
+import javax.swing.*;
 
 import java.awt.BorderLayout;
-
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class MainFrame extends JFrame {
-	
-	private ToolBar toolbar;
-	private FormPanel formPanel;
-	private TextPanel textPanel;
-	private RocketComponent custComponent;
+    
+    private ToolBar toolbar;
+    private FormPanel formPanel;
+    private TextPanel textPanel;
+    private RocketComponent custComponent;
+    private Timer animationTimer;
 
-	
+    public MainFrame() {
+        super("SpaceX");
+        
+        setLayout(new BorderLayout());
+        toolbar = new ToolBar();
+        formPanel = new FormPanel();
+        textPanel = new TextPanel();
+        custComponent = new RocketComponent();
+        
+        add(toolbar, BorderLayout.NORTH);
+        add(formPanel, BorderLayout.CENTER);
+        add(textPanel, BorderLayout.SOUTH);
+        add(custComponent, BorderLayout.EAST);
+        
+        toolbar.setRocketListener(new RocketListener() {
+            @Override
+            public void rocketReturn() {
+                
+                custComponent.returnToStarbase();
+                textPanel.clearTextArea();
+                textPanel.appendText("Starship returned to starbase");
 
-	public MainFrame() {
-		
-		super("SpaceX");
-		
-		setLayout(new BorderLayout());
-		toolbar = new ToolBar();
-		formPanel = new FormPanel();
-		textPanel = new TextPanel();
-		custComponent = new RocketComponent();
-		
-		add(toolbar,BorderLayout.NORTH);
-		add(formPanel, BorderLayout.CENTER);
-		add(textPanel, BorderLayout.SOUTH);
-		add(custComponent, BorderLayout.EAST);
-		
-		toolbar.setRocketListener(new RocketListener() {
-			
-			@Override
-			public void rocketReturn() {
-				// TODO Auto-generated method stub
-				textPanel.appendText("Starship returned to starbase\n");
-				
-			}
-			
-			@Override
-			public void rocketEmitted() {
-				// TODO Auto-generated method stub
-				
-				textPanel.appendText("Starship launched\n");
-				
-			}
-			
-			@Override
-			public void rocketCleared() {
-				// TODO Auto-generated method stub
-				textPanel.clearTextArea();
-				System.out.println("StarBase cleared\n");
-				
-			}
-		});
-		
-		setSize(800, 700);
-		setLocationRelativeTo(null);
-		
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setVisible(true);
-		
-		setJMenuBar(createMenuBar());
+            }
+            
+            @Override
+            public void rocketEmitted() {
+            	textPanel.clearTextArea();
+                textPanel.appendText("Starship launched");
+                custComponent.launchRocket(); 
+            }
+            
+            @Override
+            public void rocketCleared() {
+                textPanel.clearTextArea();
+                System.out.println("StarBase cleared");
+            }
+        });
+        
+        setSize(800, 700);
+        setLocationRelativeTo(null);
+        
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setVisible(true);
+        
+        setJMenuBar(createMenuBar());
+        
+        
+        animationTimer = new Timer(30, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                custComponent.update(); // Update rocket position
+            }
+        });
+        animationTimer.start(); 
+    }
+    
+    private JMenuBar createMenuBar() {
+        JMenuBar menuBar = new JMenuBar();
+        JMenu fileMenu = new JMenu("spaceX");
 
-		
-	}
-	
-	private JMenuBar createMenuBar() {
-		
-		JMenuBar menuBar = new JMenuBar();
-		
-		JMenu fileMenu = new JMenu("Star Link");
-		JMenuItem exportDataItem = new JMenuItem("Features");
-		JMenuItem importDataItem = new JMenuItem("Engine");
-		JMenuItem exitItem = new JMenuItem("Power Off");
+        // Load the icon from a file path
+        ImageIcon icon = new ImageIcon("/Users/alanluke/eclipse-workspace/spaceX/spacexIcon.png");
 
-		fileMenu.add(exportDataItem);
-		
-		fileMenu.add(importDataItem);
-		fileMenu.addSeparator();
-		fileMenu.add(exitItem);
-		
+        // Resize the icon to a smaller size (e.g., 24x24 pixels)
+        ImageIcon resizedIcon = resizeIcon(icon, 24, 24); // Adjust the size as needed
 
-		menuBar.add(fileMenu);
+        // Set the resized icon to the menu
+        fileMenu.setIcon(resizedIcon);
 
-		
-		return menuBar;
+        JMenuItem exportDataItem = new JMenuItem("Features");
+        JMenuItem importDataItem = new JMenuItem("Engine");
+        JMenuItem exitItem = new JMenuItem("Power Off");
 
-}
+        fileMenu.add(exportDataItem);
+        fileMenu.add(importDataItem);
+        fileMenu.addSeparator();
+        fileMenu.add(exitItem);
+
+        menuBar.add(fileMenu);
+
+        return menuBar;
+    }
+
+    // Method to resize the icon
+    private ImageIcon resizeIcon(ImageIcon icon, int width, int height) {
+        Image image = icon.getImage(); // Get the original image
+        Image resizedImage = image.getScaledInstance(width, height, Image.SCALE_SMOOTH); // Resize the image
+        return new ImageIcon(resizedImage); // Return a new ImageIcon with the resized image
+    }
 }
