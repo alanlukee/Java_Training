@@ -15,14 +15,14 @@ public class ToolBar extends JPanel {
     private RocketListener rocketListener;
     
     public ToolBar() {
-        // Set background color to black
+       
         setBackground(Color.BLACK);
 
         launchButton = new JButton("Launch Rocket");
         returnButton = new JButton("Return to Starbase");
         removeButton = new JButton("Remove Rocket");
 
-        // Set button text color to white and background color to dark gray
+    
         launchButton.setForeground(Color.WHITE);
         returnButton.setForeground(Color.WHITE);
         removeButton.setForeground(Color.WHITE);
@@ -31,7 +31,7 @@ public class ToolBar extends JPanel {
         returnButton.setBackground(Color.DARK_GRAY);
         removeButton.setBackground(Color.DARK_GRAY);
 
-        // Optional: Remove button border for a flat look
+       
         launchButton.setBorderPainted(false);
         returnButton.setBorderPainted(false);
         removeButton.setBorderPainted(false);
