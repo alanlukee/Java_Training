@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class ParkingLotManager {
 	
-	ArrayList<ParkingSpot> parkingspots = new ArrayList<ParkingSpot>();
+	 ArrayList<ParkingSpot> parkingspots = new ArrayList<ParkingSpot>();
 	
 	public ParkingLotManager() {
 		
@@ -13,18 +13,19 @@ public class ParkingLotManager {
 		ParkingSpot sp3 = new ParkingSpot(3, "compact", false, 10);
 		ParkingSpot sp4 = new ParkingSpot(4, "large", false, 30);
 		ParkingSpot sp5 = new ParkingSpot(5, "regular", false, 20);
+		
+		parkingspots.add(sp1);
+		parkingspots.add(sp2);
+		parkingspots.add(sp3);
+		parkingspots.add(sp4);
+		parkingspots.add(sp5);
 
 		
+		
 	}
-	
 
-	//remove vehicle
 
-	//parking fee.
-	
-	
-	
-	public synchronized void addParkingSpot(ParkingSpot spot) throws SpotAlreadyExistsException {
+	public void addParkingSpot(ParkingSpot spot) throws SpotAlreadyExistsException {
 		
 		boolean spotOccupied = false;
 		
@@ -40,10 +41,9 @@ public class ParkingLotManager {
 			parkingspots.add(spot);
 		}
 		
-		
 	}
 	
-	public synchronized void parkVehicle(int spotId, Vehicle vehicle) throws SpotUnsuitableException, SpotAlreadyOccupiedException {
+	public void parkVehicle(int spotId, Vehicle vehicle) throws SpotUnsuitableException, SpotAlreadyOccupiedException {
 		
 		boolean spotOccupied = false;
 		for(ParkingSpot i : parkingspots) {
@@ -51,18 +51,18 @@ public class ParkingLotManager {
 				if(i.isOccupied()==false) {
 					spotOccupied =false;
 					if(vehicle.getVehicleType().equals("motorcycle") && i.getSpotType().equals("compact")) {
-						System.out.println("able to park");
+						System.out.println("Motorcycle can be parked");
 						i.setOccupied(true);
 						break;
 					}
 					else if(vehicle.getVehicleType().equals("car") && i.getSpotType().equals("regular")) {
-						System.out.println("able to park");
+						System.out.println("Car can be parked");
 						i.setOccupied(true);
 						break;
 
 					}
 					else if(vehicle.getVehicleType().equals("truck") && i.getSpotType().equals("large")) {
-						System.out.println("able to park");
+						System.out.println("Truck can be parked");
 						i.setOccupied(true);
 						break;
 					}
@@ -84,31 +84,57 @@ public class ParkingLotManager {
 	}
 	
 	
-	public synchronized void removeVehicle(int spotId, Vehicle vehicle) {
+	public void removeVehicle(int spotId) throws SpotNotOccupiedException {
 		boolean foundVehicle = false;
 		for(ParkingSpot i : parkingspots) {
 			
+			if(i.getSpotId() == spotId) {
+				foundVehicle = true;
+				System.out.println("Vehicle removed");
+				i.setOccupied(false);
+				break;
+			}
+		}
+		if(foundVehicle = false) {
+			throw new SpotNotOccupiedException("Spot is not occupied");
 		}
 		
 	}
 	
 	public void viewAvailableSpots() throws SpotUnavailableException {
 		
-		boolean isAvail = true;
+
 		
 		for(ParkingSpot i : parkingspots) {
 			if(i.isOccupied() == false) {
-				isAvail = true;
+				System.out.println(" ");
 				System.out.println(i.getSpotId()+ " is available\n");
-				System.out.println("Details: "+ i.toString());
+				System.out.println(i.toString());
+				System.out.println(" ");
 			}
 			else {
-				isAvail = false;
+				System.out.println(" ");
 				System.out.println(i.getSpotId()+ " is not available\n");
 			}
 			
 		}
 
+	}
+	
+	public void calculateParkingFee(int spotId, int hours ) {
+		
+		double parkingFee= 0;
+		
+		for(ParkingSpot i : parkingspots) {
+			
+			if(i.getSpotId()==spotId) {
+				parkingFee = i.getPricePerHour() *hours;
+				break;
+			}
+
+		}
+		System.out.println("Parking cost for vehicle in spot-id: "+spotId+" is "+parkingFee+" rupees");
+		
 	}
 
 }
