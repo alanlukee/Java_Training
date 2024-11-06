@@ -1,0 +1,179 @@
+import javax.swing.*;
+import javax.swing.event.*;
+import java.awt.*;
+import java.awt.event.*;
+
+public class UserFormApp extends JFrame {
+    private JTextField usernameField;
+    private JPasswordField passwordField;
+    private JTextArea commentsArea;
+    private JSpinner ageSpinner;
+    private JSlider satisfactionSlider;
+    private JList<String> optionsList;
+    private JButton submitButton;
+    private JButton cancelButton;
+    private JLabel resultLabel;
+    
+    public UserFormApp() {
+        setTitle("User Form Application");
+        setSize(500, 600);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        // Setup Root Pane, Content Pane, and Layered Pane
+        JRootPane rootPane = getRootPane();
+        Container contentPane = rootPane.getContentPane();
+        JLayeredPane layeredPane = rootPane.getLayeredPane();
+        
+        contentPane.setLayout(new BorderLayout());
+        contentPane.add(createToolBar(), BorderLayout.NORTH);
+        contentPane.add(createFormPanel(), BorderLayout.CENTER);
+        
+        resultLabel = new JLabel("");
+        contentPane.add(resultLabel, BorderLayout.SOUTH);
+        
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                System.out.println("Window is closing");
+            }
+        });
+    }
+
+    private JToolBar createToolBar() {
+        JToolBar toolBar = new JToolBar();
+        toolBar.add(new JButton("New"));
+        toolBar.add(new JButton("Save"));
+        JButton exitButton = new JButton("Exit");
+        exitButton.addActionListener(e -> System.exit(0));
+        toolBar.add(exitButton);
+        return toolBar;
+    }
+
+    private JPanel createFormPanel() {
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        
+        // Username Field
+        JLabel usernameLabel = new JLabel("Username:");
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        formPanel.add(usernameLabel, gbc);
+        
+        usernameField = new JTextField();
+        usernameField.setPreferredSize(new Dimension(200, 24));
+        gbc.gridx = 1;
+        formPanel.add(usernameField, gbc);
+        usernameField.addFocusListener(new FocusListener() {
+            public void focusGained(FocusEvent e) {}
+            public void focusLost(FocusEvent e) {
+                System.out.println("Username field lost focus");
+            }
+        });
+        
+        // Password Field
+        JLabel passwordLabel = new JLabel("Password:");
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        formPanel.add(passwordLabel, gbc);
+        
+        passwordField = new JPasswordField();
+        passwordField.setPreferredSize(new Dimension(200, 24));
+        gbc.gridx = 1;
+        formPanel.add(passwordField, gbc);
+        
+        // Comments Area
+        JLabel commentsLabel = new JLabel("Comments:");
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        formPanel.add(commentsLabel, gbc);
+        
+        commentsArea = new JTextArea(5, 20);
+        commentsArea.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+        gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.BOTH;
+        formPanel.add(new JScrollPane(commentsArea), gbc);
+        
+        // Age Spinner
+        JLabel ageLabel = new JLabel("Age:");
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        formPanel.add(ageLabel, gbc);
+        
+        ageSpinner = new JSpinner(new SpinnerNumberModel(18, 0, 100, 1));
+        gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        formPanel.add(ageSpinner, gbc);
+        
+        // Satisfaction Slider
+        JLabel satisfactionLabel = new JLabel("Satisfaction:");
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        formPanel.add(satisfactionLabel, gbc);
+        
+        satisfactionSlider = new JSlider(0, 100);
+        gbc.gridx = 1;
+        formPanel.add(satisfactionSlider, gbc);
+        
+        // Options List
+        JLabel optionsLabel = new JLabel("Options:");
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        formPanel.add(optionsLabel, gbc);
+        
+        optionsList = new JList<>(new String[] {"Option 1", "Option 2", "Option 3"});
+        optionsList.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+        gbc.gridx = 1;
+        formPanel.add(new JScrollPane(optionsList), gbc);
+
+        // Submit and Cancel Buttons
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        submitButton = new JButton("Submit");
+        cancelButton = new JButton("Cancel");
+
+        submitButton.addActionListener(new SubmitAction());
+        cancelButton.addActionListener(e -> System.exit(0));
+
+        buttonPanel.add(submitButton);
+        buttonPanel.add(cancelButton);
+        
+        gbc.gridx = 0;
+        gbc.gridy = 6;
+        gbc.gridwidth = 2;
+        formPanel.add(buttonPanel, gbc);
+
+        return formPanel;
+    }
+
+    private class SubmitAction implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            String username = usernameField.getText();
+            String password = new String(passwordField.getPassword());
+            String comments = commentsArea.getText();
+            int age = (Integer) ageSpinner.getValue();
+            int satisfaction = satisfactionSlider.getValue();
+            String selectedOption = optionsList.getSelectedValue();
+            
+            if (username.isEmpty() || password.isEmpty()) {
+                resultLabel.setText("Username and password are required.");
+                return;
+            }
+            
+            String message = "<html>Submitted Data:<br>"
+                            + "Username: " + username + "<br>"
+                            + "Password: " + password + "<br>"
+                            + "Comments: " + comments + "<br>"
+                            + "Age: " + age + "<br>"
+                            + "Satisfaction: " + satisfaction + "<br>"
+                            + "Selected Option: " + (selectedOption == null ? "None" : selectedOption) + "</html>";
+            resultLabel.setText(message);
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            UserFormApp app = new UserFormApp();
+            app.setVisible(true);
+        });
+    }
+}
