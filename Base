@@ -1,0 +1,54 @@
+import java.util.HashMap;
+import java.util.Map;
+
+public class AirportManager {
+    private final Map<Integer, Bag> bags = new HashMap<>();
+    private final Map<Integer, Flight> flights = new HashMap<>();
+
+    public synchronized void checkInBag(Bag bag) throws BagAlreadyCheckedInException {
+        if (bags.containsKey(bag.getBagId())) {
+            throw new BagAlreadyCheckedInException("Bag with ID " + bag.getBagId() + " is already checked in.");
+        }
+        bags.put(bag.getBagId(), bag);
+        bag.setStatus("Checked In");
+        System.out.println("Checked in: " + bag);
+    }
+
+    public synchronized void loadBag(int flightId, int bagId) throws UnableToLoadBagException {
+        Bag bag = bags.get(bagId);
+        Flight flight = flights.get(flightId);
+
+        if (bag == null || !bag.getStatus().equals("Checked In")) {
+            throw new UnableToLoadBagException("Bag is not checked in or already loaded.");
+        }
+        if (flight == null) {
+            throw new UnableToLoadBagException("Flight not found.");
+        }
+
+        flight.addBag(bag);
+        System.out.println("Loaded bag " + bagId + " onto flight " + flightId);
+    }
+
+    public synchronized void retrieveBag(int bagId) throws BagNotRetrievableException {
+        Bag bag = bags.get(bagId);
+        if (bag == null || !bag.getStatus().equals("Checked In")) {
+            throw new BagNotRetrievableException("Bag is not retrievable.");
+        }
+        bags.remove(bagId);
+        bag.setStatus("Retrieved");
+        System.out.println("Bag " + bagId + " retrieved.");
+    }
+
+    public void addFlight(Flight flight) {
+        flights.put(flight.flightId, flight);
+    }
+
+    public void viewLoadedBags(int flightId) {
+        Flight flight = flights.get(flightId);
+        if (flight != null) {
+            System.out.println("Bags loaded on flight " + flightId + ": " + flight.getLoadedBags());
+        } else {
+            System.out.println("Flight not found.");
+        }
+    }
+}
