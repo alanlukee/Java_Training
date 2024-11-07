@@ -10,8 +10,7 @@ public class Driver {
 		this.driverId = driverId;
 		this.name = name;
 		this.isAvailable = true;
-		
-		
+		currentRide = null;
 	}
 	
 	
@@ -40,5 +39,6 @@ public class Driver {
 		this.currentRide = currentRide;
 	}
 	
+
 
 }
