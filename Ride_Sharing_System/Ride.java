@@ -5,21 +5,22 @@ import java.util.Objects;
 public class Ride {
 	private int rideId;
 	private String passengerName;
-	private String driverName;
+	private int driverId;
 	private String pickUpLocation;
 	private String dropLocation;
 	private String status;
 	
 	
-	public Ride(int rideId, String passengerName, String driverName, String pickUpLocation, String dropLocation) {
+	public Ride(int rideId, String passengerName, String pickUpLocation, String dropLocation) {
 		
 		
 		this.rideId = rideId;
 		this.passengerName = passengerName;
-		this.driverName = driverName;
+		//this.driverName = driverName;
 		this.pickUpLocation =pickUpLocation;
 		this.dropLocation = dropLocation;
-		this.status = "Requested";
+		this.status = "null";
+		this.driverId = 0;
 	}
 	
 	
@@ -49,7 +50,7 @@ public class Ride {
 
 	@Override
 	public String toString() {
-		return "Ride [rideId=" + rideId + ", passengerName=" + passengerName + ", driverName=" + driverName
+		return "Ride [rideId=" + rideId + ", passengerName=" + passengerName + ", driverId=" + driverId
 				+ ", pickUpLocation=" + pickUpLocation + ", dropLocation=" + dropLocation + ", status=" + status + "]";
 	}
 
@@ -71,11 +72,11 @@ public class Ride {
 	public void setPassengerName(String passengerName) {
 		this.passengerName = passengerName;
 	}
-	public String getDriverName() {
-		return driverName;
+	public int getDriverId() {
+		return driverId;
 	}
-	public void setDriverName(String driverName) {
-		this.driverName = driverName;
+	public void setDriverId(int driverId) {
+		this.driverId = driverId;
 	}
 	public String getPickUpLocation() {
 		return pickUpLocation;
