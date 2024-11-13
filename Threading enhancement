@@ -1,0 +1,165 @@
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.locks.*;
+
+public class StockTradingPlatform {
+
+    // ThreadGroups for managing different types of threads
+    private final ThreadGroup buyOrderGroup = new ThreadGroup("Buy Orders");
+    private final ThreadGroup sellOrderGroup = new ThreadGroup("Sell Orders");
+    private final ThreadGroup marketAnalysisGroup = new ThreadGroup("Market Analysis");
+
+    // ThreadLocal for storing client session information
+    private static final ThreadLocal<ClientSession> clientSession = ThreadLocal.withInitial(ClientSession::new);
+
+    // Locks for shared resources
+    private final ReentrantLock tradeLock = new ReentrantLock();
+    private final ReentrantLock priceLock = new ReentrantLock();
+
+    // ExecutorService for handling client requests
+    private final ExecutorService tradeRequestPool = Executors.newFixedThreadPool(10);
+    private final ForkJoinPool analysisPool = new ForkJoinPool();
+
+    // Shared resource: stock prices
+    private final Map<String, Double> stockPrices = new ConcurrentHashMap<>();
+
+    // Platform initialization
+    public void initializePlatform() {
+        // Initial stock prices (mock data)
+        stockPrices.put("AAPL", 150.0);
+        stockPrices.put("GOOG", 2800.0);
+        stockPrices.put("TSLA", 700.0);
+    }
+
+    // Simulate client request processing
+    public void simulateClientRequests() {
+        // Each client performs various actions concurrently
+        Runnable clientTask = () -> {
+            ClientSession session = clientSession.get();
+            session.initializeSession("Client_" + Thread.currentThread().getId(), 10000.0);
+
+            // Simulate various actions
+            placeBuyOrder("AAPL", 10);
+            checkAccountBalance();
+            performMarketAnalysis();
+        };
+
+        // Submit multiple clients to the tradeRequestPool
+        for (int i = 0; i < 5; i++) {
+            tradeRequestPool.submit(clientTask);
+        }
+    }
+
+    // Buy Order simulation
+    public void placeBuyOrder(String stock, int quantity) {
+        Runnable buyOrderTask = () -> {
+            try {
+                tradeLock.lock();
+                Double price = stockPrices.get(stock);
+                if (price != null) {
+                    double cost = price * quantity;
+                    ClientSession session = clientSession.get();
+                    if (session.accountBalance >= cost) {
+                        session.accountBalance -= cost;
+                        System.out.println("Bought " + quantity + " shares of " + stock + " for $" + cost);
+                    } else {
+                        System.out.println("Insufficient balance to buy " + stock);
+                    }
+                }
+            } finally {
+                tradeLock.unlock();
+            }
+        };
+
+        new Thread(buyOrderGroup, buyOrderTask).start();
+    }
+
+    // Sell Order simulation
+    public void placeSellOrder(String stock, int quantity) {
+        Runnable sellOrderTask = () -> {
+            try {
+                tradeLock.lock();
+                Double price = stockPrices.get(stock);
+                if (price != null) {
+                    double revenue = price * quantity;
+                    ClientSession session = clientSession.get();
+                    session.accountBalance += revenue;
+                    System.out.println("Sold " + quantity + " shares of " + stock + " for $" + revenue);
+                }
+            } finally {
+                tradeLock.unlock();
+            }
+        };
+
+        new Thread(sellOrderGroup, sellOrderTask).start();
+    }
+
+    // Account balance check using Callable and Future
+    public Future<Double> checkAccountBalance() {
+        Callable<Double> balanceTask = () -> {
+            ClientSession session = clientSession.get();
+            return session.accountBalance;
+        };
+
+        Future<Double> futureBalance = tradeRequestPool.submit(balanceTask);
+        futureBalance.whenComplete((balance, ex) -> {
+            if (ex == null) {
+                System.out.println("Account balance: $" + balance);
+            } else {
+                System.err.println("Error checking balance: " + ex.getMessage());
+            }
+        });
+
+        return futureBalance;
+    }
+
+    // Market Analysis using Fork/Join
+    public void performMarketAnalysis() {
+        RecursiveAction analysisTask = new RecursiveAction() {
+            @Override
+            protected void compute() {
+                stockPrices.forEach((stock, price) -> {
+                    System.out.println("Analyzing " + stock + ": $" + price);
+                });
+            }
+        };
+        analysisPool.invoke(analysisTask);
+    }
+
+    // Halt all threads in the Sell Orders group if a stop-loss condition occurs
+    public void haltSellOrders() {
+        sellOrderGroup.interrupt();
+        System.out.println("Sell orders halted due to stop-loss threshold.");
+    }
+
+    // Shutdown platform gracefully
+    public void shutdownPlatform() {
+        tradeRequestPool.shutdown();
+        analysisPool.shutdown();
+        System.out.println("Platform shutdown.");
+    }
+
+    // Client session management class
+    private static class ClientSession {
+        private String sessionId;
+        private double accountBalance;
+
+        public void initializeSession(String sessionId, double accountBalance) {
+            this.sessionId = sessionId;
+            this.accountBalance = accountBalance;
+        }
+    }
+
+    public static void main(String[] args) {
+        StockTradingPlatform platform = new StockTradingPlatform();
+        platform.initializePlatform();
+
+        platform.simulateClientRequests();
+
+        // Simulate stop-loss scenario
+        platform.haltSellOrders();
+
+        // Shutdown after tasks
+        platform.shutdownPlatform();
+    }
+}
