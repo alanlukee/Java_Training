@@ -1,0 +1,220 @@
+package com.threadGroupDemo;
+
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.Future;
+import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.locks.ReentrantLock;
+
+public class StockTradingPlatform {
+	
+	private final ThreadGroup buyOrderGroup = new ThreadGroup("Buy Orders");
+	private final ThreadGroup sellOrderGroup = new ThreadGroup("Sell Orders");
+	private final ThreadGroup marketAnalysisGroup = new ThreadGroup("Market Anlysis");
+	
+	private static final ThreadLocal <ClientSession> clientSession = ThreadLocal.withInitial(ClientSession::new);
+	
+	//the withinitial method is a static factory method provided by threadlocal to create a 
+	//threadlocal variable with an initial value...it takes in a supplier which is a functional interface..
+	//that provides an initial value for the threadlocal variable when its first accessed by the thread.
+	//it is called ONCE PER THREAD.
+	
+	private final ReentrantLock tradeLock = new ReentrantLock();
+	private final ReentrantLock priceLock = new ReentrantLock();
+	
+	//these are two main types of shared resources that need protection.
+	
+	//trade processing(tradeLock) --> this involves modifying a clients account
+	//balance during buy and sell operations.
+	
+	//stock price data(priceLock) --> thus involves reading or updating stock prices
+	//which might be updates frequently as market data changes.
+	
+	
+    private final ExecutorService tradeRequestPool = Executors.newFixedThreadPool(10);
+    private final ForkJoinPool analysisPool = new ForkJoinPool();
+    
+    
+    // Shared resource: stock prices
+    private final Map<String, Double> stockPrices = new ConcurrentHashMap<>();
+    
+    
+    //provides a thread safe access to its entries.
+    //allows multiple threads to read and write to the map concurrently without 
+    //causing data inconsistency .
+    //in the application, threads may frequently need to update stock prices or read them
+    //to process buy/ sell orders. 
+    //concurrentHashmap allows both operations to happen concurrently in the safe way.
+
+    
+    public void initializationPlatform() {
+    	
+    	stockPrices.put("AAPL", 150.0);
+    	stockPrices.put("GOOG", 2800.0);
+    	stockPrices.put("TSLA", 700.0);
+    }
+    
+    
+    //Simulate client request rocessing
+    
+    public void simulateClientRequests() {
+    	
+    	// it simulates how multiple client sessions interact with teh stock trading platform
+    	//concurrently.This method is responsible for submitting client tasks to the thread pool.
+    	//client task represents a single clients actions in the system.
+    	
+    	//inside the clientTask, we access the ThreadLocal variable clientSession.
+    	//this retreieves the session object specific to the current thread.
+    	
+    	//by initializing session data here, each client thread can operate independently
+    	//without interfering with other threads sessions..
+    	
+    	
+    	Runnable clientTask = () ->
+    	{
+    		ClientSession session = clientSession.get(); //get the session object
+    		session.initializeSession("Client_" + Thread.currentThread().getId(), 10000.0);
+    		placeBuyOrder("AAPL",10);
+    		checkAccountBalance();
+    		performMarketAnalysis();
+    		
+    	};
+    	
+    	//submit multiple clients to the tradeRequestPool.
+    	
+    	for(int i = 0; i<5 ; i++) {
+    		tradeRequestPool.submit(clientTask);
+    	}
+    }
+    
+    
+    public void placeBuyOrder (String stock, int quantity) {
+    	Runnable buyOrderTask = ()
+    			-> {
+    				try {
+    					tradeLock.lock();  // acquire the lock before modifying shared resources.
+        				Double price = stockPrices.get(stock);
+        				if(price != null) {
+        					double cost = price * quantity;
+        					ClientSession session = clientSession.get();
+        					if(session.accountBalance >=cost) {
+        						session.accountBalance -= cost;
+        						System.out.println("Bought "+ quantity+ " shares of "+ stock+ " for $" + cost);
+        					}
+        					else {
+        						System.out.println("Insufficient balance to buy "+ stock);
+        					}
+        				}
+    				}
+        				finally {
+        					tradeLock.unlock();
+        					//njksnbjbsjbsfoikankiojsij
+        					
+        				}	
+   
+    			};
+    			new Thread(buyOrderGroup, buyOrderTask).start();
+    }
+    
+    
+    public void placeSellOrder(String stock, int quantity) {
+    	Runnable sellOrderTask = ()
+    			-> {
+    				try {
+    					tradeLock.lock();
+    					Double price = stockPrices.get(stock);
+    					if(price !=null) {
+    						double revenue = price * quantity;
+    						ClientSession session = clientSession.get();
+    						session.accountBalance += revenue;
+    						System.out.println("Sold "+ quantity + "shares of "+stock + "for $ "+revenue);
+    					}
+    				}
+    				finally {
+    					tradeLock.unlock();
+    				}
+    			};
+    			new Thread(sellOrderGroup, sellOrderTask).start();
+    }
+    
+    public Future<Double> checkAccountBalance(){
+    	
+    	Callable<Double> balanceTask = () -> {
+			ClientSession session = clientSession.get();
+			return session.accountBalance;
+    	};
+    	
+    	CompletableFuture<Double> futureBalance = (CompletableFuture<Double>) tradeRequestPool.submit(balanceTask);
+    	futureBalance.whenComplete((balance,ex)->{
+    		if(ex ==null) {
+    			System.out.println("Account balance: $"+balance);
+    		}
+    		else {
+    			System.err.println("Error checking balance: "+ex.getMessage());
+    		}
+    	});
+    	return futureBalance;
+    }
+    
+    public void performMarketAnalysis() {
+    	RecursiveAction analysisTask = new RecursiveAction() {
+
+			@Override
+			protected void compute() {
+				// TODO Auto-generated method stub
+				stockPrices.forEach((stock, price)
+					-> {
+						System.out.println("Analyzing "+ stock+ ": $" + price);
+					});
+				
+			}
+    		
+    	};
+    	analysisPool.invoke(analysisTask);
+    }
+    
+    //halt all threads in the sell orders group if a stop-loss condition occurs.
+    
+    public void haltSellOrders() {
+    	sellOrderGroup.interrupt();
+    	System.out.println("Sell orders halted due to stop loss threshold.");
+    }
+    
+    public void shutdownPlatform() {
+    	tradeRequestPool.shutdown();
+    	analysisPool.shutdown();
+    	System.out.println("Platform shutdown");
+    }
+
+	private static class ClientSession{
+		private String sessionId;
+		private double accountBalance;
+		
+		public void initializeSession(String sessionId, double accountBalance) {
+			this.sessionId = sessionId;
+			this.accountBalance = accountBalance;
+		}
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		
+		StockTradingPlatform platform = new StockTradingPlatform();
+		platform.initializationPlatform();
+		platform.simulateClientRequests();
+		platform.haltSellOrders();
+		//platform.shutdownPlatform();
+
+	}
+	}
+}
+
+
+
+
+
+
