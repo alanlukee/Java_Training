@@ -10,6 +10,7 @@ public class StockTradingPlatform {
     private final ThreadGroup sellOrderGroup = new ThreadGroup("Sell Orders");
     private final ThreadGroup marketAnalysisGroup = new ThreadGroup("Market Analysis");
 
+    // ThreadLocal to store ClientSession specific to each thread
     private static final ThreadLocal<ClientSession> clientSession = ThreadLocal.withInitial(ClientSession::new);
 
     private final ReentrantLock tradeLock = new ReentrantLock();
@@ -18,6 +19,7 @@ public class StockTradingPlatform {
     private final ExecutorService tradeRequestPool = Executors.newFixedThreadPool(10);
     private final ForkJoinPool analysisPool = new ForkJoinPool();
 
+    // Shared stock prices data
     private final Map<String, Double> stockPrices = new ConcurrentHashMap<>();
 
     public void initializationPlatform() {
@@ -33,9 +35,13 @@ public class StockTradingPlatform {
     }
 
     private void clientTask() {
+        // Retrieve and initialize session
         ClientSession session = clientSession.get();
         session.initializeSession("Client_" + Thread.currentThread().getId(), 10000.0);
 
+        System.out.println("Initialized session for " + session.sessionId);
+
+        // Run trading operations
         placeBuyOrder("AAPL", 10);
         checkAccountBalance().thenAccept(balance ->
             System.out.println("Account balance for " + session.sessionId + ": $" + balance));
@@ -119,6 +125,7 @@ public class StockTradingPlatform {
         public void initializeSession(String sessionId, double accountBalance) {
             this.sessionId = sessionId;
             this.accountBalance = accountBalance;
+            System.out.println("Session initialized: " + sessionId + " with balance $" + accountBalance);
         }
     }
 
