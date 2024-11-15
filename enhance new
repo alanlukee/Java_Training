@@ -1,0 +1,150 @@
+import java.util.*;
+import java.util.concurrent.*;
+
+public class StockTradingPlatform {
+    private static Map<String, Double> stockPrices = new ConcurrentHashMap<>();
+    private static Map<String, ClientSession> clientSessions = new ConcurrentHashMap<>();
+    private Lock lock = new ReentrantLock();
+    private ExecutorService tradingThreadPool = Executors.newFixedThreadPool(10);
+    private ForkJoinPool analyticPool = new ForkJoinPool();
+
+    static class ClientSession {
+        String sessionId;
+        String clientName;
+        double accountBalance;
+
+        public ClientSession(String clientName) {
+            this.sessionId = UUID.randomUUID().toString();
+            this.clientName = clientName;
+            this.accountBalance = 10000.0;
+        }
+    }
+
+    public void registerClient(String clientId, String clientName) {
+        clientSessions.put(clientId, new ClientSession(clientName));
+    }
+
+    public Future<Double> getStockPrice(String stockSymbol) {
+        return tradingThreadPool.submit(() -> stockPrices.getOrDefault(stockSymbol, 0.0));
+    }
+
+    public Future<Double> getAccountBalance(String clientId) {
+        return tradingThreadPool.submit(() -> {
+            ClientSession session = clientSessions.get(clientId);
+            if (session == null) throw new IllegalArgumentException("Invalid client ID");
+            return session.accountBalance;
+        });
+    }
+
+    public void executeBuyOrder(String clientId, String stockSymbol, double amount) {
+        new Thread(() -> {
+            lock.lock();
+            try {
+                ClientSession session = clientSessions.get(clientId);
+                if (session == null) throw new IllegalArgumentException("Invalid client ID");
+
+                double stockPrice = stockPrices.getOrDefault(stockSymbol, 0.0);
+                if (session.accountBalance >= amount * stockPrice) {
+                    session.accountBalance -= amount * stockPrice;
+                    System.out.println("Buy order executed for " + stockSymbol + " by " + session.clientName);
+                } else {
+                    System.out.println("Insufficient balance for " + session.clientName);
+                }
+            } finally {
+                lock.unlock();
+            }
+        }).start();
+    }
+
+    public void executeSellOrder(String clientId, String stockSymbol, double amount) {
+        new Thread(() -> {
+            lock.lock();
+            try {
+                ClientSession session = clientSessions.get(clientId);
+                if (session == null) throw new IllegalArgumentException("Invalid client ID");
+
+                double stockPrice = stockPrices.getOrDefault(stockSymbol, 0.0);
+                session.accountBalance += amount * stockPrice;
+                System.out.println("Sell order executed for " + stockSymbol + " by " + session.clientName);
+            } finally {
+                lock.unlock();
+            }
+        }).start();
+    }
+
+    public void performMarketAnalysis(List<String> stockSymbols) {
+        analyticPool.invoke(new StockAnalysisTask(stockSymbols));
+    }
+
+    private class StockAnalysisTask extends RecursiveAction {
+        private List<String> stockSymbols;
+
+        public StockAnalysisTask(List<String> stockSymbols) {
+            this.stockSymbols = stockSymbols;
+        }
+
+        @Override
+        protected void compute() {
+            if (stockSymbols.size() <= 1) {
+                stockSymbols.forEach(symbol -> System.out.println("Analyzing stock: " + symbol));
+            } else {
+                int mid = stockSymbols.size() / 2;
+                invokeAll(
+                        new StockAnalysisTask(stockSymbols.subList(0, mid)),
+                        new StockAnalysisTask(stockSymbols.subList(mid, stockSymbols.size()))
+                );
+            }
+        }
+    }
+
+    public void haltSellOrders() {
+        System.out.println("Market crash detected! Halting all Sell Orders.");
+        sellOrders.interrupt();
+    }
+
+    public static void main(String[] args) throws InterruptedException, ExecutionException {
+        StockTradingPlatform platform = new StockTradingPlatform();
+        platform.stockPrices.put("DEGEN", 230.99);
+        platform.stockPrices.put("BTC", 70.0);
+
+        // Register multiple clients
+        platform.registerClient("client1", "Alice");
+        platform.registerClient("client2", "Bob");
+
+        // Simulate multiple clients performing operations
+        ExecutorService clientSimulationPool = Executors.newFixedThreadPool(2);
+
+        clientSimulationPool.submit(() -> {
+            platform.executeBuyOrder("client1", "DEGEN", 2);
+            platform.executeSellOrder("client1", "BTC", 1);
+            try {
+                Future<Double> balance = platform.getAccountBalance("client1");
+                System.out.println("Client1 (Alice) Balance: " + balance.get());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+        clientSimulationPool.submit(() -> {
+            platform.executeBuyOrder("client2", "BTC", 1);
+            platform.executeSellOrder("client2", "DEGEN", 2);
+            try {
+                Future<Double> balance = platform.getAccountBalance("client2");
+                System.out.println("Client2 (Bob) Balance: " + balance.get());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+        clientSimulationPool.shutdown();
+        clientSimulationPool.awaitTermination(10, TimeUnit.SECONDS);
+
+        List<String> stocks = Arrays.asList("DEGEN", "BTC", "DigiByte");
+        platform.performMarketAnalysis(stocks);
+
+        platform.haltSellOrders();
+
+        platform.tradingThreadPool.shutdown();
+        platform.analyticPool.shutdown();
+    }
+}
