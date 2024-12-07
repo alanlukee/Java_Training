@@ -144,6 +144,10 @@ public class ButtonsBar extends JPanel {
 		this.timerButtonListener = timerListener;
 	}
 	
+	public JButton getTimerButton() {
+		return timerButton;
+	}
+	
 	
 	
 	public void setActiveButtonIcon() {

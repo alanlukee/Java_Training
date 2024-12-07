@@ -148,12 +148,71 @@ public class SnapShotAppMeta extends JFrame{
 	}
 	
 	private void timerProcess() {
-		
-		
+		//time interval list
+		DefaultListModel<String> listModel = new DefaultListModel<String>();
+			
+			for(int i = 1; i <= 10;i++) {
+				listModel.addElement(Integer.toString(i));
+			}
+			
+		JList<String> timeList = new JList<>(listModel);
+				
+		timeList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);		
+		JScrollPane scrollPane = new JScrollPane(timeList);
+						
+		JPopupMenu popupMenu = new JPopupMenu();
+		popupMenu.add(scrollPane);
+				
 
+		popupMenu.show(buttonsBar,60,0);
+
+				
+		// add list selection listener to handle the selection of time intervals
+		boolean[] isActive = {false};
 		
-		
+		timeList.addListSelectionListener(event ->{
+			
+			if(!event.getValueIsAdjusting()) {
+				String selectedInterval = timeList.getSelectedValue();
+						
+				if(selectedInterval != null) {
+					interval = Integer.parseInt(selectedInterval)*1000;
+					buttonsBar.getTimerButton().setToolTipText("selected interval:"+ selectedInterval);
+					System.out.println("Screenshot interval:"+selectedInterval);
+					
+					if(isActive[0]) {
+						System.out.println("New snapshot interval selected..");
+						restartTimer();
+					}
+					
+					//close the popup menu
+					popupMenu.setVisible(false);
+						}
+					}
+				});
 	}
+	
+	private void restartTimer() {
+		
+		
+		if(screenshotTimer!=null) {
+			screenshotTimer.cancel();
+		}
+		screenshotTimer = new Timer();
+		
+		screenshotTimer.scheduleAtFixedRate(new TimerTask() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				takeScreenshot();
+			}
+			
+		}, 0, interval);
+		
+		System.out.println("Timer restarted with new interval: "+interval/1000+" seconds");
+	}		
+	
 	
 	
 	private void takeScreenshot() {
