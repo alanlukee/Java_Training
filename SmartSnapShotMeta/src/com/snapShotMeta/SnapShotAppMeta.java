@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.Toolkit;
@@ -14,6 +15,7 @@ import java.util.TimerTask;
 
 import javax.imageio.ImageIO;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -31,6 +33,11 @@ public class SnapShotAppMeta extends JFrame{
 	private int interval = 2000;
 	private boolean isActive = false;
 	private int screenshotCounter = 1;
+	
+	DefaultListModel<String> listModel;
+	JList<String> timeList;
+	JScrollPane scrollPane;
+	JPopupMenu popupMenu;
 
 	
 	
@@ -97,7 +104,14 @@ public class SnapShotAppMeta extends JFrame{
 			isActive = true;
 			buttonsBar.setActiveButtonIcon();
 			buttonsBar.enableStopButon(true);
+			
+			ImageIcon activeIcon = new ImageIcon("src\\assets\\snapshot_active.png");
+			Image scaledActiveImage = activeIcon.getImage().getScaledInstance(80, 85,  Image.SCALE_SMOOTH);
+
+			setIconImage(scaledActiveImage);
+			
 			setState(Frame.ICONIFIED);
+			
 			
 			screenshotTimer = new Timer();
 			screenshotTimer.scheduleAtFixedRate(new TimerTask() {
@@ -126,6 +140,7 @@ public class SnapShotAppMeta extends JFrame{
 			buttonsBar.setStartButtonIcon();
 			buttonsBar.enableStopButon(false);
 			
+			
 			if(screenshotTimer!=null) {
 				screenshotTimer.cancel();
 			}
@@ -138,7 +153,7 @@ public class SnapShotAppMeta extends JFrame{
 				@Override
 				public void run() {
 					// TODO Auto-generated method stub
-					System.out.println("prevwiing");
+					System.out.println("Opening preview window");
 					PreviewWindow previewer = new PreviewWindow();
 					previewer.setVisible(true);
 					
@@ -149,27 +164,22 @@ public class SnapShotAppMeta extends JFrame{
 	
 	private void timerProcess() {
 		//time interval list
-		DefaultListModel<String> listModel = new DefaultListModel<String>();
+		listModel = new DefaultListModel<String>();
 			
-			for(int i = 1; i <= 10;i++) {
-				listModel.addElement(Integer.toString(i));
+		for(int i = 1; i <= 10;i++) {
+			listModel.addElement(Integer.toString(i));
 			}
 			
-		JList<String> timeList = new JList<>(listModel);
+		timeList = new JList<>(listModel);
 				
 		timeList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);		
-		JScrollPane scrollPane = new JScrollPane(timeList);
+		scrollPane = new JScrollPane(timeList);
 						
-		JPopupMenu popupMenu = new JPopupMenu();
+		popupMenu= new JPopupMenu();
 		popupMenu.add(scrollPane);
-				
-
-		popupMenu.show(buttonsBar,60,0);
-
-				
-		// add list selection listener to handle the selection of time intervals
-		boolean[] isActive = {false};
 		
+		popupMenu.show(buttonsBar, 400, -40);
+
 		timeList.addListSelectionListener(event ->{
 			
 			if(!event.getValueIsAdjusting()) {
@@ -178,23 +188,22 @@ public class SnapShotAppMeta extends JFrame{
 				if(selectedInterval != null) {
 					interval = Integer.parseInt(selectedInterval)*1000;
 					buttonsBar.getTimerButton().setToolTipText("selected interval:"+ selectedInterval);
-					System.out.println("Screenshot interval:"+selectedInterval);
+					System.out.println("Screenshot interval set to :"+interval/1000 +" seconds");
 					
-					if(isActive[0]) {
-						System.out.println("New snapshot interval selected..");
+					if(isActive) {
 						restartTimer();
+						popupMenu.setVisible(false);
 					}
 					
-					//close the popup menu
-					popupMenu.setVisible(false);
 						}
 					}
 				});
 	}
 	
+	
 	private void restartTimer() {
 		
-		
+
 		if(screenshotTimer!=null) {
 			screenshotTimer.cancel();
 		}

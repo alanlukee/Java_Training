@@ -72,14 +72,12 @@ public class ButtonsBar extends JPanel {
 		timerButton.setToolTipText("Snapshot interval");
 		timerButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-
 		
-		
-				
-
 		add(startButton);
 		add(stopButton);
 		add(timerButton);
+		
+		
 
 		startButton.addActionListener(new ActionListener() {
 			
@@ -101,6 +99,16 @@ public class ButtonsBar extends JPanel {
 			}
 		});
 		
+		
+		timerButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				timerButtonListener.timerButtonAction();
+			}
+		});
+		
 		//time interval list
 		DefaultListModel<String> listModel = new DefaultListModel<String>();
 			
@@ -116,15 +124,7 @@ public class ButtonsBar extends JPanel {
 		JPopupMenu popupMenu = new JPopupMenu();
 		popupMenu.add(scrollPane);
 		
-		
-		timerButton.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				timerButtonListener.timerButtonAction();
-			}
-		});
+
 		
 
 		
@@ -148,8 +148,6 @@ public class ButtonsBar extends JPanel {
 		return timerButton;
 	}
 	
-	
-	
 	public void setActiveButtonIcon() {
 		
 		//active icon for the start button.
@@ -158,6 +156,8 @@ public class ButtonsBar extends JPanel {
 		ImageIcon scaledActiveIcon = new ImageIcon(scaledActiveImage);
 		startButton.setIcon(scaledActiveIcon);
 	}
+	
+
 	
 	public void setStopButtonIcon(String path) {
 		stopButton.setIcon(new ImageIcon(path));
