@@ -2,21 +2,15 @@ package com.snapShotMeta;
 
 import java.awt.Color;
 import java.awt.Cursor;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import javax.swing.BorderFactory;
-import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.ListSelectionModel;
+
 
 public class ButtonsBar extends JPanel {
 	
@@ -37,7 +31,7 @@ public class ButtonsBar extends JPanel {
 		setLayout(new FlowLayout(FlowLayout.LEFT,45,10));
 	
 		
-		ImageIcon startIcon = new ImageIcon("src\\assets\\snapshot_icon.png");
+		ImageIcon startIcon = new ImageIcon("src/assets/snapshot_icon.png");
 		Image scaledStartImage = startIcon.getImage().getScaledInstance(80, 85, Image.SCALE_SMOOTH);
 		ImageIcon scaledStartIcon = new ImageIcon(scaledStartImage);
 		
@@ -49,7 +43,7 @@ public class ButtonsBar extends JPanel {
 		startButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		
 		
-		ImageIcon stopIcon = new ImageIcon("src\\assets\\snapshot_stop.png");
+		ImageIcon stopIcon = new ImageIcon("src/assets/snapshot_stop.png");
 		Image scaledStopImage = stopIcon.getImage().getScaledInstance(75, 84,Image.SCALE_SMOOTH);
 		ImageIcon scaledStopIcon = new ImageIcon(scaledStopImage);
 		
@@ -62,7 +56,7 @@ public class ButtonsBar extends JPanel {
 
 		
 	
-		ImageIcon timerIcon = new ImageIcon("src\\assets\\timer.png");
+		ImageIcon timerIcon = new ImageIcon("src/assets/timer.png");
 		Image timerImage = timerIcon.getImage().getScaledInstance(75, 80, Image.SCALE_SMOOTH);
 		ImageIcon scaledTimerIcon = new ImageIcon(timerImage);
 		
@@ -107,27 +101,7 @@ public class ButtonsBar extends JPanel {
 				// TODO Auto-generated method stub
 				timerButtonListener.timerButtonAction();
 			}
-		});
-		
-		//time interval list
-		DefaultListModel<String> listModel = new DefaultListModel<String>();
-			
-			for(int i = 1; i <= 10;i++) {
-				listModel.addElement(Integer.toString(i));
-			}
-			
-		JList<String> timeList = new JList<>(listModel);
-				
-		timeList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);		
-		JScrollPane scrollPane = new JScrollPane(timeList);
-						
-		JPopupMenu popupMenu = new JPopupMenu();
-		popupMenu.add(scrollPane);
-		
-
-		
-
-		
+		});	
 	}
 
 	
@@ -148,13 +122,22 @@ public class ButtonsBar extends JPanel {
 		return timerButton;
 	}
 	
+	public JButton getStartButton() {
+		return startButton;
+	}
+	
+	public JButton getStopButton() {
+		return stopButton;
+	}
+	
 	public void setActiveButtonIcon() {
 		
 		//active icon for the start button.
-		ImageIcon activeIcon = new ImageIcon("src\\assets\\snapshot_active.png");
+		ImageIcon activeIcon = new ImageIcon("src/assets/snapshot_active.png");
 		Image scaledActiveImage = activeIcon.getImage().getScaledInstance(80, 85,  Image.SCALE_SMOOTH);
 		ImageIcon scaledActiveIcon = new ImageIcon(scaledActiveImage);
 		startButton.setIcon(scaledActiveIcon);
+		
 	}
 	
 
@@ -164,7 +147,7 @@ public class ButtonsBar extends JPanel {
 	}
 	
 	public void setStartButtonIcon() {
-		ImageIcon startIcon = new ImageIcon("src\\assets\\snapshot_icon.png");
+		ImageIcon startIcon = new ImageIcon("src/assets/snapshot_icon.png");
 		Image scaledStartImage = startIcon.getImage().getScaledInstance(80, 85, Image.SCALE_SMOOTH);
 		ImageIcon scaledStartIcon = new ImageIcon(scaledStartImage);
 		startButton.setIcon(scaledStartIcon);

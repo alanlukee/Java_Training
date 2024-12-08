@@ -17,7 +17,7 @@ public class PreviewWindow extends JFrame {
 
     public PreviewWindow() {
         setTitle("Image Viewer");
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Close only this window
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); //only that particular window is closed
         setSize(1000, 600);
         setLocationRelativeTo(null);
 
@@ -33,7 +33,7 @@ public class PreviewWindow extends JFrame {
     }
 
     private void loadImages() {
-        String folderPath = "src\\snapShots\\";
+        String folderPath = "src/snapShots/";
         File folder = new File(folderPath);
         if (!folder.exists() || !folder.isDirectory()) {
             JOptionPane.showMessageDialog(this, "Snapshot folder not found!", "Error", JOptionPane.ERROR_MESSAGE);
@@ -46,8 +46,10 @@ public class PreviewWindow extends JFrame {
 
         if (files != null && files.length > 0) {
             System.out.println("Found " + files.length + " image(s).");
+            
             imagePanel.removeAll();
             selectedFiles.clear();
+            
             for (File file : files) {
                 addImageToPanel(file);
             }
@@ -76,7 +78,6 @@ public class PreviewWindow extends JFrame {
 
             // Create checkbox
             JCheckBox checkBox = new JCheckBox(file.getName());
-            //checkBox.setBackground(Color.LIGHT_GRAY);
             checkBox.setFont(new Font("Arial", Font.BOLD, 14));
             checkBox.setHorizontalAlignment(SwingConstants.CENTER);
             checkBox.setPreferredSize(new Dimension(windowWidth, 30)); // Size the checkbox to be more prominent
