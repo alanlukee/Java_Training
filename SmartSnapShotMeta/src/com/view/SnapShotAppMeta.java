@@ -32,13 +32,14 @@ public class SnapShotAppMeta extends JFrame{
 
 	public SnapShotAppMeta() {
 		super("Smart SnapShot App");
+		buttonsBar = new ButtonsBar();
 		
 		controller = new ScreenshotController(buttonsBar);
 		
 		
 		setLayout(new BorderLayout());
 		
-		buttonsBar = new ButtonsBar();
+
 		
 		add(buttonsBar,BorderLayout.CENTER);
 				
