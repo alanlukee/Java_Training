@@ -1,9 +1,10 @@
-package com.snapShotMeta;
+package com.view;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.Toolkit;
@@ -11,16 +12,11 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
-
 import javax.imageio.ImageIO;
-import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
 import javax.swing.JWindow;
-import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 
 public class SnapShotAppMeta extends JFrame{
@@ -32,8 +28,6 @@ public class SnapShotAppMeta extends JFrame{
 	private boolean isActive = false;
 	private int screenshotCounter = 1;
 
-	
-	
 	public SnapShotAppMeta() {
 		
 		
@@ -44,43 +38,54 @@ public class SnapShotAppMeta extends JFrame{
 		buttonsBar = new ButtonsBar();
 		
 		
+//		buttonsBar.setStartListener(new StartButtonListener() {
+//			@Override
+//			public void startButtonAction() {
+//				startScreenShotProcess();	
+//			}
+//		});
+//		
+//		buttonsBar.setStopListener(new StopButtonListener() {
+//			@Override
+//			public void stopButtonAction() {
+//				stopScreenShotProcess();	
+//			}
+//		});
+//		
+//		buttonsBar.setTimerListener(new TimerButtonListener() {
+//			
+//			@Override
+//			public void timerButtonAction() {
+//				// TODO Auto-generated method stub
+//				timerProcess();
+//			}
+//		});
 		
-		buttonsBar.setStartListener(new StartButtonListener() {
-			@Override
-			public void startButtonAction() {
-				startScreenShotProcess();	
-			}
-		});
-		
-		buttonsBar.setStopListener(new StopButtonListener() {
-			@Override
-			public void stopButtonAction() {
-				stopScreenShotProcess();	
-			}
-		});
-		
-		
-
-		
-		buttonsBar.setTimerListener(new TimerButtonListener() {
+		buttonsBar.setButtonsListener(new ButtonsListener() {
 			
 			@Override
 			public void timerButtonAction() {
 				// TODO Auto-generated method stub
-				
-				timerProcess();
+				timerProcess();	
+			}
+			
+			@Override
+			public void stopButtonAction() {
+				// TODO Auto-generated method stub
+				stopScreenShotProcess();
+			}
+			
+			@Override
+			public void startButtonAction() {
+				// TODO Auto-generated method stub
+				startScreenShotProcess();
 			}
 		});
 		
-		
-		
-		
-		add(buttonsBar,BorderLayout.CENTER);
-		
-		
-				
-
 	
+	
+		add(buttonsBar,BorderLayout.CENTER);
+				
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setSize(460,150);
 		setLocation(1050, 650);
@@ -95,11 +100,19 @@ public class SnapShotAppMeta extends JFrame{
 		if(!isActive) {
 			System.out.println("Snapshot functionality initiated.");
 			isActive = true;
+			
 			buttonsBar.setActiveButtonIcon();
 			buttonsBar.enableStopButon(true);
+			
+			ImageIcon activeIcon = new ImageIcon("src/assets/snapshot_active.png");
+			Image scaledActiveImage = activeIcon.getImage().getScaledInstance(80, 85,  Image.SCALE_SMOOTH);
+			setIconImage(scaledActiveImage);
+			
 			setState(Frame.ICONIFIED);
 			
+			
 			screenshotTimer = new Timer();
+			
 			screenshotTimer.scheduleAtFixedRate(new TimerTask() {
 
 				@Override
@@ -110,7 +123,6 @@ public class SnapShotAppMeta extends JFrame{
 				
 			}, 0, interval);
 			
-			isActive = true;
 		}
 		else {
 			System.out.println("Start button is already active.");
@@ -126,6 +138,7 @@ public class SnapShotAppMeta extends JFrame{
 			buttonsBar.setStartButtonIcon();
 			buttonsBar.enableStopButon(false);
 			
+			
 			if(screenshotTimer!=null) {
 				screenshotTimer.cancel();
 			}
@@ -138,7 +151,7 @@ public class SnapShotAppMeta extends JFrame{
 				@Override
 				public void run() {
 					// TODO Auto-generated method stub
-					System.out.println("prevwiing");
+					System.out.println("Opening preview window");
 					PreviewWindow previewer = new PreviewWindow();
 					previewer.setVisible(true);
 					
@@ -148,52 +161,38 @@ public class SnapShotAppMeta extends JFrame{
 	}
 	
 	private void timerProcess() {
-		//time interval list
-		DefaultListModel<String> listModel = new DefaultListModel<String>();
-			
-			for(int i = 1; i <= 10;i++) {
-				listModel.addElement(Integer.toString(i));
-			}
-			
-		JList<String> timeList = new JList<>(listModel);
-				
-		timeList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);		
-		JScrollPane scrollPane = new JScrollPane(timeList);
-						
-		JPopupMenu popupMenu = new JPopupMenu();
-		popupMenu.add(scrollPane);
-				
-
-		popupMenu.show(buttonsBar,60,0);
-
-				
-		// add list selection listener to handle the selection of time intervals
-		boolean[] isActive = {false};
 		
-		timeList.addListSelectionListener(event ->{
-			
-			if(!event.getValueIsAdjusting()) {
-				String selectedInterval = timeList.getSelectedValue();
-						
-				if(selectedInterval != null) {
-					interval = Integer.parseInt(selectedInterval)*1000;
-					buttonsBar.getTimerButton().setToolTipText("selected interval:"+ selectedInterval);
-					System.out.println("Screenshot interval:"+selectedInterval);
-					
-					if(isActive[0]) {
-						System.out.println("New snapshot interval selected..");
-						restartTimer();
-					}
-					
-					//close the popup menu
-					popupMenu.setVisible(false);
-						}
-					}
-				});
+        String[] options = {"1", "2", "3","4", "5", "6", "7" ,"8" ,"9","10"};
+        
+        String selected = (String) JOptionPane.showInputDialog(
+                this,
+                "Select timer interval (seconds):",
+                "Set Timer", 
+                JOptionPane.PLAIN_MESSAGE, 
+                null,
+                options,
+                String.valueOf(interval / 1000)
+        );
+
+        if (selected != null) {
+            try {
+                int newInterval = Integer.parseInt(selected) * 1000;
+                interval = newInterval;
+                buttonsBar.getTimerButton().setToolTipText("Selected interval: " + selected + " seconds");
+                System.out.println("Screenshot interval set to: " + interval / 1000 + " seconds");
+
+                if (isActive) {
+                    restartTimer();
+                }
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Invalid input", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+	
 	}
 	
+
 	private void restartTimer() {
-		
 		
 		if(screenshotTimer!=null) {
 			screenshotTimer.cancel();
@@ -214,21 +213,20 @@ public class SnapShotAppMeta extends JFrame{
 	}		
 	
 	
-	
 	private void takeScreenshot() {
 
 		try {
 			
 			flashScreen();
-			Robot robot = new Robot(); //interface to interact with the screen
+			Robot robot = new Robot(); 
 			
-			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); //provides access to the systems graphical environment.
-			//getScreenSize() would fetch the dimensions of the entire screen.
+			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); 
 		
-			Rectangle screenRect = new Rectangle(screenSize); //Rectangle class is used to define a rectangular region.
 		
-			BufferedImage screenshot = robot.createScreenCapture(screenRect); //captures the screenarea defined by screenrect
-			//																	and stored as a bufferedImage object
+			Rectangle screenRect = new Rectangle(screenSize); 
+		
+			BufferedImage screenshot = robot.createScreenCapture(screenRect); 
+																				
 		
 			String folderPath = "src/snapShots/";
 			String fileName = "screenshot_" +screenshotCounter+".png";
@@ -237,13 +235,12 @@ public class SnapShotAppMeta extends JFrame{
 			System.out.println("Screen captured");
 			System.out.println("Screenshot saved: "+file.getAbsolutePath());
 		
-			//JOptionPane.showMessageDialog(null, "Screenshot saved: "+file.getAbsolutePath());
 		
 			screenshotCounter++;
 		
 		}
 		catch(Exception ex){
-			ex.printStackTrace();
+			
 			JOptionPane.showMessageDialog(null, "Failed to capture screen" +ex.getMessage(),"error",JOptionPane.ERROR_MESSAGE);	
 		}
 }
@@ -266,8 +263,4 @@ public class SnapShotAppMeta extends JFrame{
 		flashWindow.dispose();
 		
 		}
-	
-
-	
-
 }
