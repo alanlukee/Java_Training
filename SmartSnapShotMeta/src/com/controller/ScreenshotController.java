@@ -54,14 +54,7 @@ public class ScreenshotController {
 			
 			buttonsBar.setActiveButtonIcon();
 			buttonsBar.enableStopButon(true);
-			//buttonsBar.minimizeAndSetIcon();
-			
-//			ImageIcon activeIcon = new ImageIcon("src/assets/snapshot_active.png");
-//			Image scaledActiveImage = activeIcon.getImage().getScaledInstance(80, 85,  Image.SCALE_SMOOTH);
-//			
-			//setIconImage(scaledActiveImage);
-			
-			//setState(Frame.ICONIFIED);
+	
 			
 			
 			screenshotTimer = new Timer();
