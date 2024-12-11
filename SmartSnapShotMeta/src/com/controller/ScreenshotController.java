@@ -1,11 +1,12 @@
 package com.controller;
 
-import java.awt.Frame;
+
 import java.awt.Image;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.swing.ImageIcon;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
@@ -14,11 +15,14 @@ import com.view.ButtonsBar;
 import com.view.ButtonsListener;
 import com.view.PreviewWindow;
 
+
 public class ScreenshotController {
 	
 	private ScreenshotModel model;
 	private ButtonsBar buttonsBar;
+	private PreviewWindow previewWindow;
 	private Timer screenshotTimer;
+
 	
 	public ScreenshotController( ButtonsBar buttonsBar ) {
 		
@@ -32,6 +36,7 @@ public class ScreenshotController {
 				// TODO Auto-generated method stub
 				stopScreenShotProcess();
 			}
+	
 			
 			@Override
 			public void startButtonAction() {
@@ -54,7 +59,20 @@ public class ScreenshotController {
 			
 			buttonsBar.setActiveButtonIcon();
 			buttonsBar.enableStopButon(true);
-	
+			
+			ImageIcon activeIcon = new ImageIcon("src/assets/snapshot_active.png");
+			Image scaledActiveImage = activeIcon.getImage().getScaledInstance(80, 85,  Image.SCALE_SMOOTH);
+			
+			
+			
+			SwingUtilities.invokeLater(()->{
+				JFrame mainFrame = (JFrame)SwingUtilities.getWindowAncestor(buttonsBar);
+				if(mainFrame!=null) {
+					mainFrame.setState(JFrame.ICONIFIED);
+					mainFrame.setIconImage(scaledActiveImage);
+				}
+			});
+
 			
 			
 			screenshotTimer = new Timer();
@@ -98,8 +116,10 @@ public class ScreenshotController {
 				public void run() {
 					// TODO Auto-generated method stub
 					System.out.println("Opening preview window");
-					PreviewWindow previewer = new PreviewWindow();
-					previewer.setVisible(true);
+					
+					openPreviewWindow();
+					//PreviewWindow previewer = new PreviewWindow();
+					//previewer.setVisible(true);
 					
 				}
 			});	
@@ -157,6 +177,16 @@ public class ScreenshotController {
 		
 		System.out.println("Timer restarted with new interval: "+model.getInterval()/1000+" seconds");
 	}	
+	
+	private void openPreviewWindow() {
+		if(previewWindow ==null || !previewWindow.isVisible()) {
+			previewWindow = new PreviewWindow(model.getScreenShots());
+			previewWindow.setVisible(true);
+		}
+		else {
+			previewWindow.refresh(model.getScreenShots());
+		}
+	}
 	
 	
 	

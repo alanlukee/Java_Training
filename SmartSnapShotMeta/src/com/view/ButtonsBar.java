@@ -11,6 +11,10 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
+/*
+ * @author Alan Luke
+ */
+
 
 public class ButtonsBar extends JPanel {
 	
@@ -20,7 +24,6 @@ public class ButtonsBar extends JPanel {
 	
 	private ButtonsListener buttonsListener;
 	
-
 	public ButtonsBar() {
 		
 		setBackground(Color.black);
@@ -98,10 +101,7 @@ public class ButtonsBar extends JPanel {
 			}
 		});	
 	}
-
 	
-
-		
 	public void setButtonsListener(ButtonsListener buttonsListener) {
 		this.buttonsListener = buttonsListener;
 	}
@@ -127,16 +127,6 @@ public class ButtonsBar extends JPanel {
 		startButton.setIcon(scaledActiveIcon);
 		
 	}
-	
-//	public void minimizeAndSetIcon() {
-//		//active icon for the start button.
-//		ImageIcon activeIcon = new ImageIcon("src/assets/snapshot_active.png");
-//		Image scaledActiveImage = activeIcon.getImage().getScaledInstance(80, 85,  Image.SCALE_SMOOTH);
-//		ImageIcon scaledActiveIcon = new ImageIcon(scaledActiveImage);
-//		
-//	}
-	
-
 	
 	public void setStopButtonIcon(String path) {
 		stopButton.setIcon(new ImageIcon(path));

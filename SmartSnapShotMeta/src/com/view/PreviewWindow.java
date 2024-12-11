@@ -13,9 +13,10 @@ import java.util.ArrayList;
 public class PreviewWindow extends JFrame {
 
     private JPanel imagePanel;
-    private ArrayList<File> selectedFiles = new ArrayList<>();
+    private ArrayList<File>  selectedFiles ;
+   
 
-    public PreviewWindow() {
+    public PreviewWindow(ArrayList<File> screenshots) {
     	
         setTitle("Image Viewer");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); 
@@ -30,33 +31,26 @@ public class PreviewWindow extends JFrame {
         JScrollPane scrollPane = new JScrollPane(imagePanel);
         add(scrollPane, BorderLayout.CENTER);
 
-        loadImages();  
+        loadImages(screenshots);  
     }
+    
+    public void refresh(ArrayList<File> screenshots) {
+    	 loadImages(screenshots);
+    }
+    
+ 
 
-    private void loadImages() {
-        String folderPath = "src\\snapShots\\";
-        File folder = new File(folderPath);
-        if (!folder.exists() || !folder.isDirectory()) {
-            JOptionPane.showMessageDialog(this, "Snapshot folder not found!", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        File[] files = folder.listFiles((dir, name) ->
-                name.toLowerCase().endsWith(".jpg") || name.toLowerCase().endsWith(".jpeg") || name.toLowerCase().endsWith(".png")
-        );
-
-        if (files != null && files.length > 0) {
-            System.out.println("Found " + files.length + " image(s).");
-            imagePanel.removeAll();
-            selectedFiles.clear();
-            for (File file : files) {
-                addImageToPanel(file);
-            }
-            imagePanel.revalidate();
-            imagePanel.repaint();
-        } else {
-            JOptionPane.showMessageDialog(this, "No images found in the snapshot folder.", "Info", JOptionPane.INFORMATION_MESSAGE);
-        }
+    private void loadImages(ArrayList<File> screenshots) {
+    	imagePanel.removeAll();
+    	if(screenshots.isEmpty()) {
+    		JOptionPane.showMessageDialog(this, "No images found", "Info", JOptionPane.INFORMATION_MESSAGE);
+    	}
+    	else {
+    		for(File file: screenshots) {
+    			addImageToPanel(file);
+    		}
+    	}
+        
     }
 
     private void addImageToPanel(File file) {
@@ -67,7 +61,6 @@ public class PreviewWindow extends JFrame {
                 return;
             }
 
-           
             int windowWidth = getWidth() - 40; 
             int scaledHeight = (bufferedImage.getHeight() * windowWidth) / bufferedImage.getWidth();
             Image scaledImage = bufferedImage.getScaledInstance(windowWidth, scaledHeight, Image.SCALE_SMOOTH);
@@ -93,6 +86,8 @@ public class PreviewWindow extends JFrame {
 
             imageContainer.add(imageLabel, BorderLayout.CENTER);
             imageContainer.add(checkBox, BorderLayout.SOUTH);
+            
+            selectedFiles = new ArrayList<>() ;
 
            
             imageLabel.addMouseListener(new MouseAdapter() {

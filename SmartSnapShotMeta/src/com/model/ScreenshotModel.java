@@ -7,6 +7,7 @@ import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
@@ -83,6 +84,26 @@ public class ScreenshotModel {
 		
 		flashWindow.dispose();
 		
+		}
+	
+	
+		public ArrayList<File> getScreenShots() {
+
+			String folderPath = "src/snapShots/";
+			File folder = new File(folderPath);
+			ArrayList<File> screenshotFiles = new ArrayList<>();
+			if (folder.exists() && folder.isDirectory()) {
+				File[] files = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".png")
+						|| name.toLowerCase().endsWith(".jpg") || name.toLowerCase().endsWith(".jpeg"));
+				if (files != null) {
+					for (File file : files) {
+						screenshotFiles.add(file);
+					}
+				}
+
+			}
+			return screenshotFiles;
+
 		}
 	
 	public void resetScreenshotCounter() {
